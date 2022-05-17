@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# usage: <version> <cmd> <args>
+
+VERSION_PREFIX=$1
+
+# this incantation is so we can specify something like "21.8" and get a
+# fully-qualified tag like "nilrt:21.8.0.49416"
+NEAREST_TAG=$(docker images \
+		| awk 'NR>1 { if ($1 != "<none>") { print $1 ":" $2 } }' \
+		| grep "nilrt:${VERSION_PREFIX}" \
+		| head -n 1)
+
+docker container run \
+	-v /mnt:/mnt \
+	-ti \
+	"${NEAREST_TAG}" \
+	${@:2}

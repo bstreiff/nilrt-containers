@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -e
+
+ROOT_DIR=$(realpath $(dirname "${BASH_SOURCE[0]}"))
+
+VERSION=$1
+
+if [ "x$VERSION" = "x" ]; then
+	echo "usage: $0 <version>"
+	echo ""
+	echo "(example: $0 21.8.0)"
+	exit 1
+fi
+
+CONTAINER_BUILD_DIR=$ROOT_DIR/build/$VERSION
+
+mkdir -p $CONTAINER_BUILD_DIR
+
+# TODO: fetch procedure and Dockerfile might vary between versions
+. "$ROOT_DIR/lib/fetch-system-image.sh"
+cp $ROOT_DIR/Dockerfile $CONTAINER_BUILD_DIR/Dockerfile
+
+if [ "x$FULL_VERSION" = "x" ]; then
+	FULL_VERSION=$VERSION
+fi
+
+docker build --tag nilrt:$FULL_VERSION $CONTAINER_BUILD_DIR
