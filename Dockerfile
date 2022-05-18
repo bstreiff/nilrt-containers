@@ -5,8 +5,7 @@ ADD systemimage.tar.gz /
 # Also add the NI software feeds
 ADD ni-software.conf /etc/opkg
 ADD ni-third-party.conf /etc/opkg
-
-# TODO: is adding ni-arch-gen meaningful at all? probably not?
+ADD ni-arch.conf /etc/opkg
 
 # post-inst type stuff
 # TODO: we should make an image type without /boot and other kernel stuff?

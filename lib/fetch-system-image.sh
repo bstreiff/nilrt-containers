@@ -65,3 +65,29 @@ FULL_VERSION=$($OPKG_CL list-installed $PKG | awk -F ' ' '{print $3}' | sed 's/\
 mv $OPKG_OFFLINE_ROOT_DIR/.syscfg-action/*/systemimage.tar.gz $CONTAINER_BUILD_DIR/systemimage.tar.gz
 mv $OPKG_OFFLINE_ROOT_DIR/etc/natinst/share/systemimage_files/ni-software.conf $CONTAINER_BUILD_DIR/ni-software.conf
 mv $OPKG_OFFLINE_ROOT_DIR/etc/natinst/share/systemimage_files/ni-third-party.conf $CONTAINER_BUILD_DIR/ni-third-party.conf
+
+# TODO: we have to have ni-arch.conf because some feed packages aren't tagged as generic
+#       core2-64, they just have six packages with "x64-{PXI, IndustrialController, etc}
+#       and are therefore uninstallable without this (lookin' at you, DAQmx).
+#       ni-arch-gen is also a pain to deal with (the ni-arch-gen script is Python, but
+#       not all base images include Python), so instead just fake up the results.
+case $DOCKER_ARCH in
+	amd64)
+		# For x64, pretend to be PXI.
+		# TODO: would we need to offer different container image types for PXI/cRIO/etc?
+		echo "arch PXI 50"              > $CONTAINER_BUILD_DIR/ni-arch.conf
+		echo "arch x64-PXI 51"         >> $CONTAINER_BUILD_DIR/ni-arch.conf
+		echo "arch DeviceCode77E1 52"  >> $CONTAINER_BUILD_DIR/ni-arch.conf
+		;;
+	arm)
+		# For ARM, pretend to be an 8-slot cRIO.
+		echo "arch cRIO 50"             > $CONTAINER_BUILD_DIR/ni-arch.conf
+		echo "arch ARM-cRIO 51"        >> $CONTAINER_BUILD_DIR/ni-arch.conf
+		echo "arch ARM-cRIO-8-slot 52" >> $CONTAINER_BUILD_DIR/ni-arch.conf
+		echo "arch DeviceCode76D6 53"  >> $CONTAINER_BUILD_DIR/ni-arch.conf
+		;;
+	*)
+		echo "Unknown docker architecture '${DOCKER_ARCH}'"
+		exit 1
+		;;
+esac
