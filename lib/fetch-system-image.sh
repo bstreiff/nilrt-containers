@@ -7,7 +7,11 @@ OPKG_BASE_DIR=$CONTAINER_BUILD_DIR-opkg
 mkdir -p $OPKG_BASE_DIR
 
 if [ "x${OPKG}" = "x" ]; then
-	OPKG=$(which opkg)
+	OPKG=$(which opkg || true)
+	if [ "x${OPKG}" = "x" ]; then
+		echo "Error: No opkg in path! We need one, or set OPKG to the path of the opkg executable."
+		exit 1
+	fi
 fi
 
 DIST_FEED=http://download.ni.com/ni-linux-rt/feeds/dist
